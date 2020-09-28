@@ -1,0 +1,50 @@
+server {
+    listen   80;
+    server_name  3.135.227.35;
+    root /home/ubuntu/endtoend_m1_v1;
+    
+    access_log /home/ubuntu/endtoend_m1_v1/logs/nginx_log/access.log;
+    error_log /home/ubuntu/endtoend_m1_v1/logs/nginx_log/error.log;
+            
+    location / {
+	proxy_set_header X-Forward-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+	proxy_redirect off;
+	if (!-f $request_filename) {
+	    proxy_pass http://127.0.0.1:8000;
+	    break;
+	}
+    }
+   
+    location /static {
+	alias /home/ubuntu/endtoend_ml_v1/static/;
+	autoindex on;
+    }
+}
+
+:wq to save and exit 
+
+we have to create the directory for our nginx logs
+
+mkdir -p /home/ubuntu/endtoend_m1_v1/logs/nginx_log
+
+create symlink for this file in /etc/nginx/sites-enabled by running this command,
+
+sudo ln -s /etc/nginx/sites-available/endtoend_m1_v1.conf /etc/nginx/sites-enabled/endtoend_m1_v1.conf
+
+restart nginx server
+
+sudo service nginx restart
+
+cd /home/ubuntu/endtoend_m1_v1
+
+mkdir /home/ubuntu/endtoend_m1_v1/.virtualenvs && cd /home/ubuntu/endtoend_m1_v1/.virtualenvs
+
+virtualenv -p python3 endtoend_m1_v1_venv
+
+source /home/ubuntu/endtoend_m1_v1/.virtualenvs/endtoend_m1_v1_venv/bin/activate
+pip3 install -r /home/ubuntu/endtoend_m1_p1/requirements.txt 
+
+pip install gunicorn
+
+gunicorn main:app -w 1
